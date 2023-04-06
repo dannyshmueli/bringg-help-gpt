@@ -41,3 +41,4 @@ next-env.d.ts
 ingested_data/
 langchain.readthedocs.io/
 help.bringg.com/
+data/
