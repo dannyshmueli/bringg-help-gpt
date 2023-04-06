@@ -45,8 +45,9 @@ yarn cleanu-data && find help.bringg.com -type f \( -name "*[^.]*" ! -name "*.*"
 and then run the ingestion script:
 
 ```bash
-yarn && yarn ingest
+yarn ingest
 ```
+**this can take 5 minutes - consider cleaning up the help.bringg.com folder before.**
 
 _Note: If on Node v16, use `NODE_OPTIONS='--experimental-fetch' yarn ingest`_
 
