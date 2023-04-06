@@ -26,9 +26,23 @@ First, you should run
 sh download.sh
 ```
 
-This will download our data source (in this case the Langchain docs ).
+This will download all `https://help.bringg.com/v1/docs/` webpages.
 
-Next, install dependencies and run the ingestion script:
+Next, install dependencies 
+
+```bash
+yarn
+```
+
+
+before ingesting the data, consider to cleanup the html data by replacing html with text:
+
+```bash
+yarn cleanu-data && find help.bringg.com -type f \( -name "*[^.]*" ! -name "*.*" \) -exec rm {} \;
+
+```
+
+and then run the ingestion script:
 
 ```bash
 yarn && yarn ingest
@@ -56,8 +70,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Deploying the server
 
-The production version of this repo is hosted on
-[fly](https://chat-langchainjs.fly.dev/). To deploy your own server on Fly, you
+To deploy your own server on Fly, you
 can use the provided `fly.toml` and `Dockerfile` as a starting point.
 
 **Note:** As a Next.js app it seems like Vercel is a natural place to
