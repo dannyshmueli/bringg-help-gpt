@@ -116,18 +116,18 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>LangChain Chat</title>
-        <meta name="description" content="LangChain documentation chatbot" />
+        <title>Bringg Help Chat</title>
+        <meta name="description" content="Bringg help chatbot" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={styles.topnav}>
         <div className = {styles.navlogo}>
-          <Link href="/">LangChain</Link>
+          <Link href="/">Bringg Help GPT</Link>
         </div>
         <div className = {styles.navlinks}>
           <a
-            href="https://langchain.readthedocs.io/en/latest/"
+            href="https://help.bringg.com/v1/docs"
             target="_blank"
             rel="noreferrer"
           >
@@ -150,7 +150,8 @@ export default function Home() {
               let className;
 
               if (message.type === "apiMessage") {
-                icon = <Image src="/parroticon.png" alt="AI" width="30" height="30" className={styles.boticon} priority />;
+                // icon = <Image src="/parroticon.png" alt="AI" width="30" height="30" className={styles.boticon} priority />;
+                icon = <Image src="/asher.png" alt="AI" width="30" height="30" className={styles.boticon} priority />;
                 className = styles.apimessage;
               } else {
                 icon = <Image src="/usericon.png" alt="Me" width="30" height="30" className={styles.usericon} priority />

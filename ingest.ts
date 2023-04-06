@@ -58,7 +58,8 @@ class ReadTheDocsLoader extends BaseDocumentLoader {
   }
 }
 
-const directoryPath = "langchain.readthedocs.io";
+//const directoryPath = "langchain.readthedocs.io";
+const directoryPath = "help.bringg.com";
 const loader = new ReadTheDocsLoader(directoryPath);
 
 export const run = async () => {
