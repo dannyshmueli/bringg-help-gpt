@@ -27,15 +27,18 @@ export default async function handler(
   };
 
   sendData(JSON.stringify({ data: "" }));
-  const chain = makeChain(vectorstore, (token: string) => {
-    sendData(JSON.stringify({ data: token }));
-  });
+  
+  // const chain = makeChain(vectorstore, (token: string) => {
+  //   sendData(JSON.stringify({ data: token }));
+  // });
+  const chain = makeChain(vectorstore);
 
   try {
-    await chain.call({
+    const res = await chain.call({
       question: body.question,
       chat_history: body.history,
     });
+    sendData(JSON.stringify({ data: res.text }));
   } catch (err) {
     console.error(err);
     // Ignore error
