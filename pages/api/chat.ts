@@ -5,6 +5,25 @@ import { HNSWLib } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 import { makeChain } from "./util";
 
+async function makeFakeData() {
+  await new Promise(r => setTimeout(r, 500));
+  return { 
+    sourceDocuments: [
+      { 
+        metadata: { 
+          source: "help.bringg.com/v1/docs/take-a-break-during-my-shift.txt"
+        }
+      },
+      { 
+        metadata: { 
+          source: "help.bringg.com/docs/a-day-in-the-life-of-a-bringg-driver.txt"
+        }
+      }
+    ],
+    text: "Yes, drivers can take scheduled breaks or pause incoming assignments to take an unexpected break, such as if they need to fix a flat tire or assist another driver with a delivery. Bringg recommends using the Driver App to take breaks and notifying the dispatcher of the break. However, the dispatcher can still assign orders manually while the driver is on break. It is important not to use silent, do not disturb (DND), or airplane mode on the phone to take a break, as Bringg and the dispatcher may continue assigning orders to the driver instead of other available drivers, causing orders to accumulate and arrive late unnecessarily. For more information, please refer to the documentation on taking a break during a shift"
+  }
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -26,11 +45,14 @@ export default async function handler(
     res.write(`data: ${data}\n\n`);
   };
 
-  sendData(JSON.stringify({ data: "" }));
-  
-  // const chain = makeChain(vectorstore, (token: string) => {
-  //   sendData(JSON.stringify({ data: token }));
-  // });
+  const sendDone = () => {
+    sendData("[DONE]");
+  };
+
+  const sendMessage = (message: string, resourceUrls: any) => {
+    sendData(JSON.stringify({ message: message, resourceUrls: resourceUrls }));
+  };
+
   const chain = makeChain(vectorstore);
 
   try {
@@ -38,12 +60,16 @@ export default async function handler(
       question: body.question,
       chat_history: body.history,
     });
-    sendData(JSON.stringify({ data: res.text }));
+
+    const onlyLinks = [... new Set(res.sourceDocuments.map((document: { metadata: { source : string; }; }) => { return 'https://' + document.metadata.source.replace(".txt", '') }))];
+
+    sendMessage(res.text, onlyLinks);
   } catch (err) {
     console.error(err);
     // Ignore error
   } finally {
-    sendData("[DONE]");
+    await new Promise(r => setTimeout(r, 500));
+    sendDone();
     res.end();
   }
 }

@@ -10,20 +10,24 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 type Message = {
   type: "apiMessage" | "userMessage";
   message: string;
+  resourceUrls?: string[];
   isStreaming?: boolean;
 }
 
 export default function Home() {
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [messageState, setMessageState] = useState<{ messages: Message[], pending?: string, history: [string, string][] }>({
+  const [messageState, setMessageState] = useState<{ 
+    messages: Message[],
+    history: [string, string][]
+   }>({
     messages: [{
       "message": "Hi there! How can I help?",
       "type": "apiMessage"
     }],
     history: []
   });
-  const { messages, pending, history } = messageState;
+  const { messages, history } = messageState;
 
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -49,20 +53,17 @@ export default function Home() {
     if (question === "") {
       return;
     }
-
     setMessageState(state => ({
       ...state,
       messages: [...state.messages, {
         type: "userMessage",
         message: question
       }],
-      pending: undefined
     }));
 
     setLoading(true);
     setUserInput("");
-    setMessageState(state => ({ ...state, pending: "" }));
-
+    
     const ctrl = new AbortController();
 
     fetchEventSource('/api/chat', {
@@ -77,22 +78,21 @@ export default function Home() {
       signal: ctrl.signal,
       onmessage: (event) => {
         if (event.data === "[DONE]") {
-          setMessageState(state => ({
-            history: [...state.history, [question, state.pending ?? ""]],
-            messages: [...state.messages, {
-              type: "apiMessage",
-              message: state.pending ?? "",
-            }],
-            pending: undefined
-          }));
           setLoading(false);
           ctrl.abort();
         } else {
           const data = JSON.parse(event.data);
-          setMessageState(state => ({
-            ...state,
-            pending: (state.pending ?? "") + data.data,
-          }));
+          let message: Message = {
+            message: data.message,
+            type: "apiMessage",
+            resourceUrls: data.resourceUrls
+          }
+          setMessageState(state => {
+            return {
+              history: [...state.history, [question, data.message]],
+              messages: [...state.messages, message]
+            }
+          });
         }
       }
     });
@@ -110,8 +110,8 @@ export default function Home() {
   };
 
   const chatMessages = useMemo(() => {
-    return [...messages, ...(pending ? [{ type: "apiMessage", message: pending }] : [])];
-  }, [messages, pending]);
+    return messages;
+  }, [messages]);
 
   return (
     <>
@@ -148,25 +148,36 @@ export default function Home() {
             {chatMessages.map((message, index) => {
               let icon;
               let className;
-
+              let resourceLinkElement;
               if (message.type === "apiMessage") {
-                // icon = <Image src="/parroticon.png" alt="AI" width="30" height="30" className={styles.boticon} priority />;
                 icon = <Image src="/asher.png" alt="AI" width="30" height="30" className={styles.boticon} priority />;
                 className = styles.apimessage;
+                if (message.resourceUrls) {
+                    resourceLinkElement = <div>Resources:
+                    <ul>
+                      {(message.resourceUrls ?? []).map((resourceUrl) => {
+                        return <li><Link className = {styles.resourceUrl} target="_blank" href={resourceUrl}>{resourceUrl}</Link></li>
+                      })}
+                    </ul>
+                  </div>
+                }
               } else {
                 icon = <Image src="/usericon.png" alt="Me" width="30" height="30" className={styles.usericon} priority />
-
+                resourceLinkElement = undefined;
                 // The latest message sent by the user will be animated while waiting for a response
                 className = loading && index === chatMessages.length - 1
                   ? styles.usermessagewaiting
                   : styles.usermessage;
               }
               return (
-                  <div key={index} className={className}>
-                    {icon}
-                    <div className = {styles.markdownanswer}>
-                      <ReactMarkdown linkTarget="_blank">{message.message}</ReactMarkdown>
+                  <div key={index}>
+                    <div className={className}>
+                      {icon}
+                      <div className = {styles.markdownanswer}>
+                        <ReactMarkdown linkTarget="_blank">{message.message}</ReactMarkdown>
+                      </div>
                     </div>
+                    {resourceLinkElement}
                   </div>
               )
             })}

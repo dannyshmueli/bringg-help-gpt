@@ -162,6 +162,10 @@
   animation: fadein 0.5s;
 }
 
+.resourceUrl {
+  text-decoration: underline;
+}
+
 @keyframes fadein {
   from { opacity: 0; }
   to   { opacity: 1; }

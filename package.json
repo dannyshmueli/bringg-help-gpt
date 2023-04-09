@@ -35,6 +35,8 @@
     "ws": "^8.12.1"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/html-to-text": "^9.0.0",
     "@types/node": "18.13.0",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
